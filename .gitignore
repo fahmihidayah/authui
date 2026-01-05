@@ -15,3 +15,5 @@
 .cxx
 local.properties
 gradle.properties
+private.key
+private.key.b64
