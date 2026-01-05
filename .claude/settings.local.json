@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew:*)",
-      "Bash(gpg --list-secret-keys:*)"
+      "Bash(gpg --list-secret-keys:*)",
+      "Bash(cat:*)"
     ]
   }
 }

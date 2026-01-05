@@ -1,24 +1,32 @@
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
     id("maven-publish")
     id("signing")
+    id("com.gradleup.nmcp") version "1.4.3"
 }
 
+group = "io.github.fahmihidayah"
+version = "0.1.0"
+
 android {
-//    namespace = "com.fahmi.authui"
-    namespace = "io.github.fahmihidayah.auth.api"
-    compileSdk {
-        version = release(36)
-    }
+    namespace = "io.github.fahmihidayah.authui"
+
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 36
+    }
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     publishing {
@@ -27,116 +35,96 @@ android {
             withJavadocJar()
         }
     }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    buildFeatures {
-        compose = true
-    }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.runtime:runtime")
 
-    // Compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.activity.compose)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // Retrofit & Gson
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.gson)
-    implementation(libs.okhttp.logging.interceptor)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.core:core-ktx:1.15.0")
 }
 
-group = "io.github.fahmihidayah"
-version = "0.1.0"
-
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            groupId = "io.github.fahmihidayah"
-            artifactId = "authui"
-            version = "0.1.0"
-
-            afterEvaluate {
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
                 from(components["release"])
-            }
+                artifactId = "authui"
 
-            pom {
-                name.set("AuthUI")
-                description.set("Android authentication UI library with Jetpack Compose and Retrofit")
-                url.set("https://github.com/fahmihidayah/authui")
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("fahmihidayah")
-                        name.set("Fahmi Hidayah")
-                        email.set("m.fahmi.hidayah@gmail.com")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:git:git://github.com/fahmihidayah/authui.git")
-                    developerConnection.set("scm:git:ssh://github.com/fahmihidayah/authui.git")
+                pom {
+                    name.set("AuthUI")
+                    description.set("Android authentication UI library")
                     url.set("https://github.com/fahmihidayah/authui")
+
+                    licenses {
+                        license {
+                            name.set("Apache License, Version 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id.set("fahmihidayah")
+                            name.set("Fahmi Hidayah")
+                            email.set("m.fahmi.hidayah@gmail.com")
+                        }
+                    }
+
+                    scm {
+                        connection.set("scm:git:https://github.com/fahmihidayah/authui.git")
+                        developerConnection.set("scm:git:ssh://git@github.com:fahmihidayah/authui.git")
+                        url.set("https://github.com/fahmihidayah/authui")
+                    }
                 }
             }
         }
+
+//        repositories {
+//            maven {
+//                name = "ossrh"
+//                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+//                credentials {
+////                    username = findProperty("ossrhUsername") as String? ?: ""
+//                    username = "4V1Kpf"
+//                    password = "hardcodedpassword"
+////                    password = findProperty("ossrhPassword") as String? ?: ""
+//                }
+//            }
+//        }
     }
 
-    repositories {
-        maven {
-            name = "sonatype"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME")
-                password = findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD")
-            }
-        }
+}
+signing {
+    val signingKey = System.getenv("GPG_PRIVATE_KEY")
+    val signingPassword = System.getenv("GPG_PASSPHRASE")
+
+    if (!signingKey.isNullOrBlank() && !signingPassword.isNullOrBlank()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications)
     }
 }
 
-signing {
-    // Only sign if credentials are configured
-    val canSign = project.hasProperty("signing.keyId") ||
-                  project.hasProperty("signing.gnupg.keyName") ||
-                  System.getenv("GPG_KEY_ID") != null
+nmcp {
+    publishAllPublicationsToCentralPortal {
+        username.set(providers.gradleProperty("centralPortalUsername"))
+        password.set(providers.gradleProperty("centralPortalPassword"))
 
-    isRequired = canSign
-
-    if (canSign) {
-        sign(publishing.publications["release"])
     }
+
+//    publish {
+//        username.set(providers.gradleProperty("centralUsername"))
+//        password.set(providers.gradleProperty("centralPassword"))
+//
+//        publicationType.set("AUTOMATIC")
+//    }
 }
